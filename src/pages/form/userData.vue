@@ -36,7 +36,6 @@
                         <el-table-column property="address" label="Address" />
                     </el-table>
                 </el-dialog>
-                <!-- <el-button size="small">编辑</el-button> -->
                 <el-button size="small" @click="edit(scope.row)">编辑</el-button>
                 <el-dialog v-model="dialogFormVisible" title="编辑信息" width="500">
                     <el-form :model="form">
@@ -63,6 +62,38 @@
                         <div class="dialog-footer">
                             <el-button @click="dialogFormVisible = false">Cancel</el-button>
                             <el-button type="primary" @click="saveEdit">
+                                Confirm
+                            </el-button>
+                        </div>
+                    </template>
+                </el-dialog>
+                <el-button size="small" @click="add()">添加</el-button>
+                <el-dialog v-model="dialogFormVisible" title="添加用户" width="500">
+                    <el-form :model="form">
+
+                        <el-form-item label="姓名" :label-width="formLabelWidth">
+                            <el-input v-model="form.name" autocomplete="off" />
+                        </el-form-item>
+                        <el-form-item label="省份" :label-width="formLabelWidth">
+                            <el-select v-model="form.province" placeholder="请选择省份">
+                                <el-option label="上海" value="上海" />
+                                <el-option label="山东" value="山东" />
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="地区" :label-width="formLabelWidth">
+                            <el-input v-model="form.city" autocomplete="off" />
+                        </el-form-item>
+                        <el-form-item label="地址" :label-width="formLabelWidth">
+                            <el-input v-model="form.address" autocomplete="off" />
+                        </el-form-item>
+                        <el-form-item label="邮编" :label-width="formLabelWidth">
+                            <el-input v-model="form.zip" autocomplete="off" />
+                        </el-form-item>
+                    </el-form>
+                    <template #footer>
+                        <div class="dialog-footer">
+                            <el-button @click="dialogFormVisible = false">Cancel</el-button>
+                            <el-button type="primary" @click="saveAdd">
                                 Confirm
                             </el-button>
                         </div>
@@ -99,7 +130,7 @@ const showDetail = (row: UserInter) => {
 const dialogFormVisible = ref(false)
 const formLabelWidth = '140px'
 const form = reactive({
-    id: '',
+    id: 1,
     date: '',
     name: '',
     province: '' as string | undefined,
@@ -107,7 +138,8 @@ const form = reactive({
     address: '' as string | undefined,
     zip: 1111 as number | undefined,
 })
-const edit = (row: UserInter)=>{
+const edit = (row: UserInter) => {
+    form.id = row.id,
     form.name = row.name
     form.province = row.province
     form.city = row.city
@@ -115,25 +147,33 @@ const edit = (row: UserInter)=>{
     form.zip = row.zip
     dialogFormVisible.value = true
 }
-function saveEdit(){
-    const index = tableData.findIndex((item) => item.id === parseInt(form.id))
-    if(index != -1){
-        Object.assign(index,1,{
-            ...tableData[index],
-            name:form.name,
-            province:form.province,
-            city:form.city,
-            address:form.address,
-            zip:form.zip
-        })
+function saveEdit() {
+    const index = tableData.findIndex((item) => item.id === form.id)
+    if (index != -1) {
+        tableData[index].name = form.name,
+        tableData[index].province = form.province,
+        tableData[index].city = form.city,
+        tableData[index].address = form.address,
+        tableData[index].zip = form.zip
+
     }
     dialogFormVisible.value = false
     console.log('success');
-    console.log(form);
-    
+    console.log(tableData[index]);
+    console.log(index);
+
+
+}
+
+function add(){
+    console.log('输入新用户');
     
 }
 
+function saveAdd(){
+    console.log('保存添加');
+    
+}
 
 let tableData = reactive<Users>([
     {
