@@ -70,7 +70,6 @@
                 <el-button size="small" @click="add()">添加</el-button>
                 <el-dialog v-model="dialogFormVisible" title="添加用户" width="500">
                     <el-form :model="form">
-
                         <el-form-item label="姓名" :label-width="formLabelWidth">
                             <el-input v-model="form.name" autocomplete="off" />
                         </el-form-item>
@@ -166,13 +165,28 @@ function saveEdit() {
 }
 
 function add(){
+    dialogFormVisible.value = true
+    form.date = new Date().toISOString().slice(0, 10);
+    form.id = Math.floor(Math.random() * 11) + 20;
     console.log('输入新用户');
     
 }
 
 function saveAdd(){
+    tableData.push({...form})
     console.log('保存添加');
-    
+    console.log(form);  
+    dialogFormVisible.value = false
+    // 清空表单
+    Object.assign(form, {
+        id: 1,
+        date: '',
+        name: '',
+        province: '',
+        city: '',
+        address: '',
+        zip: 1111,
+    });
 }
 
 let tableData = reactive<Users>([
