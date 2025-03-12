@@ -1,9 +1,10 @@
 <template>
 
-    <!-- <div class="data"> -->
-    <!-- <h2>数据栏</h2> -->
-    <!-- <slot :users="tableData"></slot> -->
-    <!-- </div> -->
+    <div class="search" style="margin-top: 30px;">
+        <!-- <el-icon><Search style="width: 1em; height: 2em; margin-right: 8px" /></el-icon> -->
+        <el-input v-model="inputValue" placeholder="请输入关键字" prefix-icon="Search">          
+        </el-input> 
+    </div>
     <el-table :data="currentPageData" style="width: 100%">
         <el-table-column fixed prop="date" label="日期" width="150">
         </el-table-column>
@@ -23,19 +24,7 @@
                     <template #reference>
                         <el-button size="small">删除</el-button>
                     </template>
-                </el-popconfirm>
-                <el-button size="small" style="margin-left: 0%;" @click="showDetail(scope.row)"> 查看</el-button>
-                <el-dialog v-model="dialogTableVisible" title="详细信息" width="1000">
-                    <el-table :data="[selectRow]" class="show">
-                        <el-table-column property="id" label="Id" width="50" />
-                        <el-table-column property="date" label="Date" width="150" />
-                        <el-table-column property="name" label="Name" width="100" />
-                        <el-table-column property="province" label="Province" width="80" />
-                        <el-table-column property="city" label="City" width="90" />
-                        <el-table-column property="zip" label="Zip" width="100" />
-                        <el-table-column property="address" label="Address" />
-                    </el-table>
-                </el-dialog>
+                </el-popconfirm>         
                 <el-button size="small" @click="edit(scope.row)">编辑</el-button>
                 <el-dialog v-model="dialogFormVisible" title="编辑信息" width="500">
                     <el-form :model="form">
@@ -116,15 +105,10 @@ export default {
 </script>
 
 <script lang="ts" setup>
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive, computed, watch } from 'vue';
 import { type UserInter, type Users } from '@/type';
 
-const dialogTableVisible = ref(false)
-const selectRow = ref<UserInter | null>(null)
-const showDetail = (row: UserInter) => {
-    selectRow.value = row
-    dialogTableVisible.value = true
-}
+const inputValue = ref('')
 
 const dialogFormVisible = ref(false)
 const formLabelWidth = '140px'
@@ -157,10 +141,9 @@ function saveEdit() {
 
     }
     dialogFormVisible.value = false
-    console.log('success');
+    console.log('edit success');
     console.log(tableData[index]);
     console.log(index);
-
 
 }
 
@@ -188,6 +171,22 @@ function saveAdd(){
         zip: 1111,
     });
 }
+
+//模糊查询功能
+const filteredData = computed(()=>{
+    if(!inputValue.value){
+        return tableData
+    }
+    const keyword = inputValue.value.toLowerCase();
+    return tableData.filter(item =>{
+        return(
+            item.name.toLowerCase().includes(keyword)||
+            item.province?.toLowerCase().includes(keyword)||
+            item.city?.toLowerCase().includes(keyword)||
+            item.address?.toLowerCase().includes(keyword)
+        )
+    })
+})
 
 let tableData = reactive<Users>([
     {
@@ -302,13 +301,19 @@ function page() {
     //分页相关数据
     const currentPage = ref(1)
     const pageSize = ref(5)
-    const total = ref(tableData.length)
+    // const total = ref(tableData.length)
+    const total = computed(()=> filteredData.value.length)  
 
     //当前页数据
     const currentPageData = computed(() => {
         const start = (currentPage.value - 1) * pageSize.value
         const end = start + pageSize.value
-        return tableData.slice(start, end)
+        return filteredData.value.slice(start, end)
+    })
+
+    //监听搜索框输入变化，重置当前页
+    watch(inputValue,()=>{
+        currentPage.value = 1;
     })
 
     return { currentPage, pageSize, total, currentPageData }
@@ -318,18 +323,11 @@ const { currentPage, pageSize, total, currentPageData } = page();
 const del = ((row: UserInter) => {
     const index = tableData.findIndex((item) => item.id === row.id);
     // console.log(index);
-    // console.log(row.id);
+    console.log('del success');
     if (index != -1) {
         tableData.splice(index, 1)
     }
 })
 
-
-
 </script>
 
-<style scoped>
-.root {
-    --el-overlay-color-lighter: rgba(255, 255, 255, 0.1);
-}
-</style>
